@@ -9,11 +9,11 @@ def create_api_blueprint(name, package_name, **kwargs):
     :param url_prefix: The url prefix of relative URL.
     """
 
-    url_prefix = kwargs.pop('url_prefix', '/')
-    url_prefix = '{url_prefix}'.format(
+    url_prefix = kwargs.pop('url_prefix', '/api/')
+    url_prefix = '{url_prefix}{name}'.format(
         name=name, url_prefix=url_prefix)
 
-    blueprint_name = '{name}'.format(name=name)
+    blueprint_name = 'api_{name}'.format(name=name)
     return _create_bp(blueprint_name, package_name,
                       url_prefix=url_prefix, **kwargs)
 
