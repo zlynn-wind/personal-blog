@@ -6,7 +6,7 @@ from starks.blueprint import Blueprint
 
 
 bp = Blueprint("video_eval", __name__, url_prefix="/api/v1/video_eval")
-FACEHACK_HOME = os.environ.get("FACEHACK_HOME", None)
+FACEHACK_HOME = os.environ.get("STARKS_FACEHACK_HOME", "./")
 
 EVAL_EXEC = os.path.join(FACEHACK_HOME, 'FaceShifter',
                          'scripts', 'video_evaluation.py')
@@ -19,7 +19,7 @@ def index():
 
 @bp.route("/trigger", methods=["GET"])
 def get_trigger():
-    pass
+    return ""
 
 
 @bp.route("/trigger", methods=["POST"])
