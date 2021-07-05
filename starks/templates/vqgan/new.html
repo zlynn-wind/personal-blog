@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>VQGAN</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="flex items-center justify-center min-h-screen bg-gray-900">
+      <div class="col-span-12 p-8">
+        <div class="overflow-auto lg:overflow-visible">
+          <h2 class="text-white font-bold text-2xl my-4">New Paint</h2>
+          <span class="text-white">Keyword</span>
+          <span class="float-right text-white">Trainning duration</span>
+
+          <form class="m-0 flex items-center justify-center leading-3" action="{{ url_for('vqgan_view.create_vqgan') }}" method="POST">
+            <input name="input_text" class="rounded-l p-2 border-t mr-0 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Text Input" value="A dog is running" />
+            <button class="bg-yellow-500 text-gray-800 font-bold p-5 uppercase border-yellow-500 border-t border-b border-r" type="submit">create new paint</button>
+            <input name="timeout" class="text-right p-2 border-t border-b text-gray-800 border-gray-200 rounded-r bg-white" placeholder="Wait secs" value="600" />
+          </form>
+
+          <center>
+            <a href="{{ url_for('vqgan_view.list_jobs') }}" class="m-6 p-4 bg-gray-500 text-gray-800 font-bold" type="submit">Go back</a>
+          </center>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
