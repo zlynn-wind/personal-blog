@@ -17,8 +17,8 @@ class VQGANJob(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     username = db.Column(db.String(64), nullable=False)
     status = db.Column(db.String(32), default=STATUS_PENDING)
-    _params = db.Column('params', db.String(4096))
-    _result = db.Column('result', db.String(4096))
+    _params = db.Column('params', db.String(4096), default="{}")
+    _result = db.Column('result', db.String(4096), default="{}")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     @classmethod
@@ -50,7 +50,8 @@ class VQGANJob(db.Model):
 
     @property
     def result(self):
-        return json.loads(self._result)
+        if self._result:
+            return json.loads(self._result)
 
     @result.setter
     def result(self, value):

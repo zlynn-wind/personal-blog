@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 import os
 import threading
@@ -11,7 +12,7 @@ from starks.modules.vqgan.model.vqgan import VQGANJob
 
 
 client = docker.from_env()
-TIMEOUT = (60)
+DEFAULT_TIMEOUT = 30
 
 
 def get_oldest_pending_job():
@@ -19,12 +20,16 @@ def get_oldest_pending_job():
 
 
 def execute_job(job):
+    job.status = VQGANJob.STATUS_IN_PROGRESS
+    job.save()
+
     params = job.params
     input_text = params.get('input_text', None)
     if input_text is None or len(input_text) == 0:
         print("`input_text` is empty")
         job.set_result(False, "`input_text` is empty")
         return
+    timeout = params.get('timeout', DEFAULT_TIMEOUT)
     docker_args = params.get('docker', None)
     if docker_args is None:
         print("`docker` is empty")
@@ -45,21 +50,21 @@ def execute_job(job):
     if not os.path.isdir(docker_volume):
         os.makedirs(docker_volume)
 
-    try:
-        container = client.containers.run(
-            docker_image,
-            docker_command,
-            auto_remove=True,
-            detach=True,
-            tty=True,
-            volumes={
-                docker_volume: {
-                    'bind': '/workspace/incubator/VQGAN_CLIP/progress/',
-                    'mode': 'rw',
-                },
+    container = client.containers.run(
+        docker_image,
+        docker_command,
+        auto_remove=True,
+        detach=True,
+        tty=True,
+        volumes={
+            docker_volume: {
+                'bind': '/workspace/incubator/VQGAN_CLIP/progress/',
+                'mode': 'rw',
             },
-        )
+        },
+    )
 
+    try:
         def wait_exit():
             last_ts = int(time.time())
             while True:
@@ -85,14 +90,13 @@ def execute_job(job):
 
         thread = threading.Thread(target=wait_exit)
         thread.start()
-        thread.join(TIMEOUT)
+        thread.join(timeout)
         if thread.is_alive():
             print("Timedout, killed")
             container.stop()
             container.remove(force=True)
-
     except Exception as e:
-        print("[ERROR]", e.get_message())
+        print("[ERROR]", e)
         raise e
     finally:
         container.stop()
@@ -100,10 +104,12 @@ def execute_job(job):
 
 
 def flush_result(job):
+    params = job.params
     today = datetime.now().strftime("%Y%m%d")
     date = params.get('date', today)
     nonce = params.get('nonce',)
-    filekey = f"vqgan/{date}/{nonce}/"
+    path = f"vqgan/{date}/{nonce}/"
+    volume = f"/opt/mediakit/public/{path}"
 
     if volume is not None:
         max_ = 0
@@ -116,7 +122,9 @@ def flush_result(job):
             except Exception:
                 continue
             max_ = max(max_, int(name))
+    filekey = f"{path.rstrip('/')}/step_{step}.png"
 
+    job.status = VQGANJob.STATUS_SUCCESS
     job.result = {
         'step': max_,
         'filekey': filekey,
@@ -135,17 +143,15 @@ def main():
                     time.sleep(3)
                     continue
                 print(f"Found job, id is {job.id}")
-                job.status = VQGANJob.STATUS_IN_PROGRESS
-                job.save()
-
-                execute_job(job)
+                try:
+                    execute_job(job)
+                except docker.errors.NotFound:
+                    pass
                 flush_result(job)
-
-                job.status = VQGANJob.STATUS_SUCCESS
-                job.save()
-        except Exception:
+        except Exception as e:
             job.status = VQGANJob.STATUS_ERROR
             job.save()
+            raise e
 
 
 if __name__ == '__main__':
