@@ -7,7 +7,7 @@ from starks.app import create_app
 from starks.extensions import db
 
 
-app = create_app(__name__)
+app = create_app("starks")
 
 
 def _import_models():
@@ -30,6 +30,8 @@ def syncdb():
     print("Database created")
 
 
-@app.cli.command("run")
-def runserver():
-    app.run(debug=True)
+@app.cli.command("dropdb")
+@with_appcontext
+def dropdb():
+    db.drop_all()
+    print('Database Dropped')
