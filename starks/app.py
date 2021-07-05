@@ -11,6 +11,7 @@ blueprints = [
     'starks.modules.index.api:bp',
     'starks.modules.video_eval.api:bp',
 
+    'starks.modules.vqgan.api:bp',
     'starks.modules.vqgan.view:bp',
 ]
 
