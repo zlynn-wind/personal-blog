@@ -10,7 +10,7 @@ bp = Blueprint("vqgan_view", __name__, url_prefix="/vqgan")
 
 
 @bp.route("")
-def index():
+def list_jobs():
     jobs = VQGANJob.list_latest_jobs()
     return render_template("vqgan/list.html", jobs=jobs)
 
@@ -45,3 +45,8 @@ def create_vqgan():
     )
     jobs = VQGANJob.list_latest_jobs()
     return render_template("vqgan/list.html", jobs=jobs)
+
+
+@bp.route('/new')
+def new():
+    return render_template("vqgan/new.html")

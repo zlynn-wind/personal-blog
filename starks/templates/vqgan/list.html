@@ -2,17 +2,14 @@
   <head>
     <title>VQGAN</title>
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <meta http-equiv="refresh" content="5">
   </head>
   <body>
     <div class="flex items-center justify-center min-h-screen bg-gray-900">
       <div class="col-span-12 p-8">
         <div class="overflow-auto lg:overflow-visible">
 
-          <form class="m-0 flex items-center justify-center leading-3" action="{{ url_for('vqgan_view.create_vqgan') }}" method="POST">
-            <input name="input_text" class="rounded-l p-2 border-t mr-0 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Text Input" value="A dog is running" />
-            <button class="bg-gray-500 text-gray-800 font-bold p-5 uppercase border-gray-500 border-t border-b border-r" type="submit">create new paint</button>
-            <input name="timeout" class="text-right p-2 border-t border-b text-gray-800 border-gray-200 rounded-r bg-white" placeholder="Wait secs" value="30" />
-          </form>
+          <a href="{{ url_for('vqgan_view.new') }}" class="bg-green-500 text-gray-800 font-bold uppercase p-4" type="submit">create new paint</a>
 
           <table class="table text-gray-400 border-separate space-y-6 text-sm">
             <thead class="bg-gray-800 text-gray-500">
@@ -89,9 +86,4 @@
       }
     </style>
   </body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script>
-    $(function() {
-    });
-  </script>
 </html>
