@@ -1,0 +1,89 @@
+<html>
+  <head>
+    <title>VQGAN</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="flex items-center justify-center min-h-screen bg-gray-900">
+      <div class="col-span-12">
+        <div class="overflow-auto lg:overflow-visible">
+
+          <form class="m-0 flex leading-3" action="{{ url_for('vqgan_view.create_vqgan') }}" method="POST">
+            <input name="input_text" class="rounded-l p-2 border-t mr-0 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Text Input" value="A dog is running" />
+            <button class="rounded-r bg-gray-500 text-gray-800 font-bold p-4 uppercase border-gray-500 border-t border-b border-r" type="submit">create new paint</button>
+          </form>
+
+          <table class="table text-gray-400 border-separate space-y-6 text-sm ">
+            <thead class="bg-gray-800 text-gray-500">
+              <tr>
+                <th class="p-3">#</th>
+                <th class="p-3 text-left">Username</th>
+                <th class="p-3 text-left">InputText</th>
+                <th class="p-3 text-left">Status</th>
+                <th class="p-3 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in jobs %}
+              <tr class="bg-gray-800">
+                <td class="p-3">{{ job.id }}</td>
+                <td class="p-3">
+                  <div class="flex align-items-center">
+                    <img class="rounded-full h-12 w-12  object-cover" src="{{ url_for('static', filename='logo.png') }}" alt="unsplash image">
+                    <div class="ml-3">
+                      <div class="">surreal</div>
+                      <div class="text-gray-500">infra-leads@surreal.la</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="p-3">
+                  {{ job.params.input_text }}
+                </td>
+                <td class="p-3 font-bold">
+                  {% if job.status == "pending" -%}
+                  <span class="bg-gray-400 text-gray-50 rounded-md px-2">{{ job.status }}</span>
+                  {%- elif job.status == "in_progress" -%}
+                  <span class="bg-yellow-400 text-gray-50 rounded-md px-2">{{ job.status }}</span>
+                  {%- elif job.status == "success" -%}
+                  <span class="bg-green-400 text-gray-50 rounded-md px-2">{{ job.status }}</span>
+                  {%- elif job.status == "error" -%}
+                  <span class="bg-red-400 text-gray-50 rounded-md px-2">{{ job.status }}</span>
+                  {%- endif -%}
+                </td>
+                <td class="p-3">
+                  <a href="{{ url_for('vqgan_view.show_result', jid=job.id) }}" class="text-gray-400 hover:text-gray-100 ml-2" target="_blank">show result</a>
+                  <br />
+                  <a href="#" class="text-gray-400 hover:text-gray-100 ml-2">cancel</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <style>
+      .table {
+        border-spacing: 0 15px;
+      }
+
+      i {
+        font-size: 1rem !important;
+      }
+
+      .table tr {
+        border-radius: 20px;
+      }
+
+      tr td:nth-child(n+5),
+      tr th:nth-child(n+5) {
+        border-radius: 0 .625rem .625rem 0;
+      }
+
+      tr td:nth-child(1),
+      tr th:nth-child(1) {
+        border-radius: .625rem 0 0 .625rem;
+      }
+    </style>
+  </body>
+</html>
