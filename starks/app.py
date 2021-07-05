@@ -7,8 +7,11 @@ from starks.error import APIError
 
 
 blueprints = [
+    'starks.modules.auth.api:bp',
     'starks.modules.index.api:bp',
     'starks.modules.video_eval.api:bp',
+
+    'starks.modules.vqgan.view:bp',
 ]
 
 
