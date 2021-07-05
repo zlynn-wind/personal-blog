@@ -5,15 +5,16 @@
   </head>
   <body>
     <div class="flex items-center justify-center min-h-screen bg-gray-900">
-      <div class="col-span-12">
+      <div class="col-span-12 p-8">
         <div class="overflow-auto lg:overflow-visible">
 
-          <form class="m-0 flex leading-3" action="{{ url_for('vqgan_view.create_vqgan') }}" method="POST">
+          <form class="m-0 flex items-center justify-center leading-3" action="{{ url_for('vqgan_view.create_vqgan') }}" method="POST">
             <input name="input_text" class="rounded-l p-2 border-t mr-0 border-b border-l text-gray-800 border-gray-200 bg-white" placeholder="Text Input" value="A dog is running" />
-            <button class="rounded-r bg-gray-500 text-gray-800 font-bold p-4 uppercase border-gray-500 border-t border-b border-r" type="submit">create new paint</button>
+            <button class="bg-gray-500 text-gray-800 font-bold p-5 uppercase border-gray-500 border-t border-b border-r" type="submit">create new paint</button>
+            <input name="timeout" class="text-right p-2 border-t border-b text-gray-800 border-gray-200 rounded-r bg-white" placeholder="Wait secs" value="30" />
           </form>
 
-          <table class="table text-gray-400 border-separate space-y-6 text-sm ">
+          <table class="table text-gray-400 border-separate space-y-6 text-sm">
             <thead class="bg-gray-800 text-gray-500">
               <tr>
                 <th class="p-3">#</th>
@@ -29,7 +30,7 @@
                 <td class="p-3">{{ job.id }}</td>
                 <td class="p-3">
                   <div class="flex align-items-center">
-                    <img class="rounded-full h-12 w-12  object-cover" src="{{ url_for('static', filename='logo.png') }}" alt="unsplash image">
+                    <img class="rounded-full h-12 w-12  object-cover" src="https://avatars.githubusercontent.com/u/65394575?s=60&v=4" alt="unsplash image">
                     <div class="ml-3">
                       <div class="">surreal</div>
                       <div class="text-gray-500">infra-leads@surreal.la</div>
@@ -51,9 +52,11 @@
                   {%- endif -%}
                 </td>
                 <td class="p-3">
+                  {% if job.status == "success" %}
                   <a href="{{ url_for('vqgan_view.show_result', jid=job.id) }}" class="text-gray-400 hover:text-gray-100 ml-2" target="_blank">show result</a>
-                  <br />
-                  <a href="#" class="text-gray-400 hover:text-gray-100 ml-2">cancel</a>
+                  {% else %}
+                  <a href="javascript:alert('unimplemented')" class="text-gray-400 hover:text-gray-100 ml-2">cancel</a>
+                  {% endif %}
                 </td>
               </tr>
               {% endfor %}
@@ -86,4 +89,9 @@
       }
     </style>
   </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    $(function() {
+    });
+  </script>
 </html>
