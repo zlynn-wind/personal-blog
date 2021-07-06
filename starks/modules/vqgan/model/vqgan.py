@@ -33,7 +33,7 @@ class VQGANJob(db.Model):
     @classmethod
     def get_next_job(cls):
         return cls.query.filter(
-            cls.status == STATUS_PENDING,
+            cls.status == cls.STATUS_PENDING,
         ).order_by(cls.id).first()
 
     @classmethod
