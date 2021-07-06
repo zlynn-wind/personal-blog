@@ -7,12 +7,13 @@ import docker
 import requests
 
 from starks.wsgi import application
-from starks.extensions import db
 from starks.modules.vqgan.model.vqgan import VQGANJob
 
 
 client = docker.from_env()
 DEFAULT_TIMEOUT = 30
+STATIC_BASE_URL = os.environ.get("STARKS_VQGAN_STATIC_BASE_URL",
+                                 "http://localhost")
 
 
 def get_oldest_pending_job():
@@ -111,6 +112,7 @@ def flush_result(job):
     path = f"vqgan/{date}/{nonce}/"
     volume = f"/opt/mediakit/public/{path}"
 
+    step = 0
     if volume is not None:
         max_ = 0
         files = os.listdir(volume)
@@ -127,6 +129,7 @@ def flush_result(job):
     job.status = VQGANJob.STATUS_SUCCESS
     job.result = {
         'step': max_,
+        'base_url': STATIC_BASE_URL,
         'filekey': filekey,
     }
     job.save()
@@ -146,6 +149,8 @@ def main():
                 try:
                     execute_job(job)
                 except docker.errors.NotFound:
+                    pass
+                except docker.errors.APIError:
                     pass
                 flush_result(job)
         except Exception as e:

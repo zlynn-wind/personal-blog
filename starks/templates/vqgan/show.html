@@ -5,7 +5,7 @@
   </head>
   <body>
     <div class="flex items-center justify-center min-h-screen bg-gray-900">
-      <img src="http://192.168.6.203:5005/{{ job.result.filekey }}" />
+      <img src="{{ job.result.base_url }}/{{ job.result.filekey }}" />
     </div>
   </body>
 </html>
