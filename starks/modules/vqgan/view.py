@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect, url_for
 
 from starks.modules.vqgan.model.vqgan import VQGANJob
 
@@ -24,7 +24,6 @@ def show_result(jid):
 @bp.route("", methods=["POST"])
 def create_vqgan():
     input_text = request.form.get("input_text")
-    input_text = input_text.replace("'", "\\'")
     timeout = request.form.get("timeout", type=int)
     today = datetime.now().strftime("%Y%m%d")
     hex_ = uuid.uuid4().hex
@@ -43,10 +42,15 @@ def create_vqgan():
             },
         }
     )
-    jobs = VQGANJob.list_latest_jobs()
-    return render_template("vqgan/list.html", jobs=jobs)
+    return redirect(url_for('vqgan_view.list_jobs'))
 
 
 @bp.route('/new')
 def new():
-    return render_template("vqgan/new.html")
+    keyword = request.args.get("keyword", "")
+    duration = request.args.get("duration", "300")
+    return render_template(
+        "vqgan/new.html",
+        keyword=keyword,
+        duration=duration,
+    )

@@ -38,6 +38,7 @@
                   {{ job.params.input_text }}
                 </td>
                 <td class="p-3 font-bold">
+                  {{ job.params.timeout }}(s)
                   {% if job.status == "pending" -%}
                   <span class="bg-gray-400 text-gray-50 rounded-md px-2">{{ job.status }}</span>
                   {%- elif job.status == "in_progress" -%}
@@ -51,8 +52,10 @@
                 <td class="p-3">
                   {% if job.status == "success" %}
                   <a href="{{ url_for('vqgan_view.show_result', jid=job.id) }}" class="text-gray-400 hover:text-gray-100 ml-2" target="_blank">show result</a>
-                  {% else %}
+                  {% elif job.status == "pending" %}
                   <a href="javascript:alert('unimplemented')" class="text-gray-400 hover:text-gray-100 ml-2">cancel</a>
+                  {% elif job.status == "error" %}
+                  <a href="{{ url_for('vqgan_view.new', duration=job.params.timeout, keyword=job.params.input_text) }}" class="text-gray-400 hover:text-gray-100 ml-2">retry</a>
                   {% endif %}
                 </td>
               </tr>
