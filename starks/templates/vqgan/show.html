@@ -4,8 +4,13 @@
     <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
   </head>
   <body>
-    <div class="flex items-center justify-center min-h-screen bg-gray-900">
-      <img src="{{ job.result.base_url }}/{{ job.result.filekey }}" />
+    <div class="flex flex-col justify-center items-center min-h-screen bg-gray-900">
+      <div class="flex-grow">
+        <h1 class="text-white font-bold text-2xl my-4">{{ job.params.input_text }}</h1>
+      </div>
+      <div class="flex-grow">
+        <img src="{{ job.result.base_url }}/{{ job.result.filekey }}" />
+      </div>
     </div>
   </body>
 </html>
