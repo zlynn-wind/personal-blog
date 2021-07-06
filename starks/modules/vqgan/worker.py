@@ -138,9 +138,9 @@ def flush_result(job):
 def main():
     print("Started worker")
     while True:
-        try:
-            with application.test_request_context():
-                job = get_oldest_pending_job()
+        with application.test_request_context():
+            job = get_oldest_pending_job()
+            try:
                 if job is None:
                     print("No jobs found")
                     time.sleep(3)
@@ -153,10 +153,10 @@ def main():
                 except docker.errors.APIError:
                     pass
                 flush_result(job)
-        except Exception as e:
-            job.status = VQGANJob.STATUS_ERROR
-            job.save()
-            raise e
+            except Exception as e:
+                job.status = VQGANJob.STATUS_ERROR
+                job.save()
+                raise e
 
 
 if __name__ == '__main__':
