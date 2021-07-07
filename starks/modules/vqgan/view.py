@@ -23,7 +23,7 @@ def show_result(jid):
 
 @bp.route("", methods=["POST"])
 def create_vqgan():
-    input_text = request.form.get("input_text")
+    input_text = request.form.get("input_text", "")
     timeout = request.form.get("timeout", type=int)
     today = datetime.now().strftime("%Y%m%d")
     hex_ = uuid.uuid4().hex
@@ -33,10 +33,10 @@ def create_vqgan():
         params={
             "nonce": hex_,
             "date": today,
-            "input_text": input_text,
+            "input_text": input_text.strip(),
             "timeout": timeout,
             "docker": {
-                "image": "surreal/vqgan-clip:2021070501",
+                "image": "surreal/vqgan-clip:latest",
                 "command": f"'{input_text}'",
                 "volume": volume,
             },
