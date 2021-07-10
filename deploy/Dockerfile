@@ -7,4 +7,5 @@ RUN pip install -r /tmp/requirements.txt -i https://pypi.douban.com/simple \
     && pip install gunicorn
 
 EXPOSE 5000
+WORKDIR "/workspace"
 CMD ["gunicorn", "-c", "/workspace/gunicorn.conf", "starks.wsgi:application"]
