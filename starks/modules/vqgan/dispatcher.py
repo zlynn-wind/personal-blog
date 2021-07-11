@@ -12,7 +12,7 @@ AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
 AWS_SECRET_KEY = os.environ.get("AWS_SECRET_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
 AWS_EKS_CLUSTER_NAME = os.environ.get("AWS_EKS_CLUSTER_NAME")
-SERVICE_NAME = os.environ.get("STARKS_VQGAN_K8S_SERVICE_NAME")
+SERVICE_ENDPOINT = os.environ.get("STARKS_VQGAN_K8S_SERVICE_ENDPOINT")
 
 
 def get_oldest_pending_job():
@@ -95,9 +95,9 @@ def main():
     while True:
         with application.test_request_context():
             PREHOOK_URL = external_url_for(
-                "vqgan.report_job", base=SERVICE_NAME)
+                "vqgan.report_job", base=SERVICE_ENDPOINT)
             POSTHOOK_URL = external_url_for(
-                "vqgan.report_job", base=SERVICE_NAME)
+                "vqgan.report_job", base=SERVICE_ENDPOINT)
             job = get_oldest_pending_job()
 
             if job is None:

@@ -16,7 +16,6 @@ output = json
 region = $AWS_REGION
 EOF
 
-python /init-kube-config.py
 aws eks update-kubeconfig --name surreal-dev
 
 gunicorn -c /workspace/gunicorn.conf starks.wsgi:application
