@@ -114,8 +114,8 @@ def main():
                     PREHOOK_URL=PREHOOK_URL,
                     POSTHOOK_URL=POSTHOOK_URL,
                 )
-            except Exception:
-                print(f"[ERROR] Failed to dispatch job: {job.id}")
+            except Exception as e:
+                print(f"[ERROR] Failed to dispatch job {job.id}: {e}")
 
 
 if __name__ == '__main__':

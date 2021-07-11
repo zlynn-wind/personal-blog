@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -18,4 +18,10 @@ EOF
 
 aws eks update-kubeconfig --name surreal-dev
 
-gunicorn -c /workspace/gunicorn.conf starks.wsgi:application
+if [[ "$1" == "server" ]];
+then
+    gunicorn -c /workspace/gunicorn.conf starks.wsgi:application
+elif [[ "$1" == "vqgan-dispatcher" ]];
+then
+    python /workspace/starks/modules/vqgan/dispatcher.py
+fi
