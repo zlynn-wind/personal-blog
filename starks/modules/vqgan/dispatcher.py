@@ -12,7 +12,7 @@ AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
 AWS_SECRET_KEY = os.environ.get("AWS_SECRET_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
 AWS_EKS_CLUSTER_NAME = os.environ.get("AWS_EKS_CLUSTER_NAME")
-AWS_DOCKER_REPO = os.environ.get("AWS_DOCEKR_REPO")
+SERVICE_NAME = os.environ.get("STARKS_VQGAN_K8S_SERVICE_NAME")
 
 
 def get_oldest_pending_job():
@@ -94,8 +94,10 @@ def main():
     config.load_kube_config()
     while True:
         with application.test_request_context():
-            PREHOOK_URL = external_url_for("vqgan.report_job")
-            POSTHOOK_URL = external_url_for("vqgan.report_job")
+            PREHOOK_URL = external_url_for(
+                "vqgan.report_job", base=SERVICE_NAME)
+            POSTHOOK_URL = external_url_for(
+                "vqgan.report_job", base=SERVICE_NAME)
             job = get_oldest_pending_job()
 
             if job is None:
