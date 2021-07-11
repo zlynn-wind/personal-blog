@@ -39,6 +39,12 @@ class VQGANJob(db.Model):
     def list_latest_jobs(cls, limit=50):
         return cls.query.order_by(cls.id.desc()).limit(limit).all()
 
+    @classmethod
+    def get_by_id(cls, id_):
+        return cls.query.filter(
+            cls.id == id_
+        ).first()
+
     @property
     def params(self):
         return json.loads(self._params)
