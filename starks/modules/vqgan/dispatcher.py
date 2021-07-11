@@ -12,6 +12,7 @@ AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY")
 AWS_SECRET_KEY = os.environ.get("AWS_SECRET_KEY")
 AWS_REGION = os.environ.get("AWS_REGION")
 AWS_EKS_CLUSTER_NAME = os.environ.get("AWS_EKS_CLUSTER_NAME")
+AWS_BUCKET_NAME = os.environ.get("AWS_BUCKET_NAME")
 SERVICE_ENDPOINT = os.environ.get("STARKS_VQGAN_K8S_SERVICE_ENDPOINT")
 
 
@@ -22,7 +23,7 @@ def get_oldest_pending_job():
                 .order_by(VQGANJob.id).first())
 
 
-def create_k8s_job(job):
+def create_k8s_job(job, prehook, posthook):
     params = job.params
     input_text = params.get("input_text")
     docker_args = params.get('docker', None)
@@ -37,6 +38,17 @@ def create_k8s_job(job):
         args=["--timeout", "120",
               "--text", f"{input_text}",
               "--job_id", job.id],
+        env=[
+            client.V1EnvVar(name="AWS_ACCESS_KEY", value=AWS_ACCESS_KEY),
+            client.V1EnvVar(name="AWS_SECRET_KEY", value=AWS_SECRET_KEY),
+            client.V1EnvVar(name="AWS_REGION", value=AWS_REGION),
+            client.V1EnvVar(name="AWS_EKS_CLUSTER_NAME",
+                            value=AWS_EKS_CLUSTER_NAME),
+            client.V1EnvVar(name="AWS_BUCKET_NAME", value=AWS_BUCKET_NAME),
+            client.V1EnvVar(name="PREHOOK_URL", value=prehook),
+            client.V1EnvVar(name="POSTHOOK_URL", value=posthook),
+            client.V1EnvVar(name="JOB_ID", value=str(job.id)),
+        ]
     )
 
     # Create and configurate a spec section
@@ -109,11 +121,7 @@ def main():
                 continue
             print(f"Found job, id is {job.id}")
             try:
-                create_k8s_job(
-                    job,
-                    PREHOOK_URL=PREHOOK_URL,
-                    POSTHOOK_URL=POSTHOOK_URL,
-                )
+                create_k8s_job(job, PREHOOK_URL, POSTHOOK_URL)
             except Exception as e:
                 print(f"[ERROR] Failed to dispatch job {job.id}: {e}")
 
