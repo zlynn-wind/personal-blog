@@ -42,5 +42,5 @@ def external_url_for(*args, **kwargs):
     path = url_for(*args, **kwargs)
     if not path.startswith('/'):
         path = '/{}'.format(path)
-    base = kwargs.get("base", config.ROOT_URL)
+    base = kwargs.pop("base", config.ROOT_URL)
     return '{base}{path}'.format(base=base, path=path)
