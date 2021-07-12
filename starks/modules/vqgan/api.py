@@ -99,7 +99,7 @@ def report_job():
         vqgan = VQGAN.create(
             text=job.params["text"],
             bucket_name=AWS_BUCKET_NAME,
-            obj_key=job.result["obj_key"]
+            obj_key=job.result.get("data", {}).get("obj_key")
         )
 
         return success({})
@@ -137,10 +137,10 @@ def get_job_preview(job_id):
     job = VQGANJob.get_by_id(job_id)
     if job is None:
         return fail(error="Job not found", status=404)
-    result = job.result
+    data = job.result.get("data", {})
     return redirect(
         sign_get_url(
-            obj_key=result.filekey,
+            obj_key=data.get("filekey"),
             bucket_name=AWS_BUCKET_NAME,
         )
     )

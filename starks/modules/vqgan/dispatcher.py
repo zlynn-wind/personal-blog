@@ -83,7 +83,7 @@ def make_job_object(api_instance, job, prehook, posthook):
             client.V1EnvVar(name="JOB_ID", value=str(job.id)),
         ],
         resources=client.V1ResourceRequirements(
-            requests=("4", "16Gi"),
+            requests={"cpu": "3", "memory": "12Gi"},
         )
     )
 
