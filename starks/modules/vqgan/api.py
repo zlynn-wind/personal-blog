@@ -18,7 +18,7 @@ def list_jobs():
 def report_job():
     payload = request.get_json()
     job_id = payload.get("job_id", None)
-    job_type = payload.get("job_type", None)
+    job_type = payload.get("task_type", None)
     status = payload.get("status", None)
     timestamp = payload.get("timestamp", None)
     data = payload.get("data", None)
