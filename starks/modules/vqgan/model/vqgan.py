@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from flask import url_for
@@ -41,5 +40,6 @@ class VQGAN(db.Model):
         return {
             "id": self.id,
             "text": self.text,
-            "preview_url": url_for("vqgan.preview", vqgan_id=self.id),
+            "preview_url": url_for("vqgan.preview_vqgan",
+                                   id_=self.id, _external=True),
         }
