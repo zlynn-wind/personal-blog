@@ -38,8 +38,9 @@ def fail_with(err):
     return fail(code=err.code, error=err.error, status=err.status)
 
 
-def external_url(*args, **kwargs):
+def external_url_for(*args, **kwargs):
+    base = kwargs.pop("base", config.ROOT_URL)
     path = url_for(*args, **kwargs)
     if not path.startswith('/'):
         path = '/{}'.format(path)
-    return '{base}{path}'.format(base=config.ROOT_URL, path=path)
+    return '{base}{path}'.format(base=base, path=path)
