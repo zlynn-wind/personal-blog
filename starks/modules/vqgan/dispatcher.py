@@ -81,7 +81,10 @@ def make_job_object(api_instance, job, prehook, posthook):
             client.V1EnvVar(name="PREHOOK_URL", value=prehook),
             client.V1EnvVar(name="POSTHOOK_URL", value=posthook),
             client.V1EnvVar(name="JOB_ID", value=str(job.id)),
-        ]
+        ],
+        resources=client.V1ResourceRequirements(
+            requests=("4", "16Gi"),
+        )
     )
 
     # Create and configurate a spec section
