@@ -45,7 +45,10 @@ def get_job():
         return fail(error="Job not found", status=404)
     return success({
         "status": job.status,
-        "preview_url": url_for('vqgan.get_job_preview', job_id=job_id),
+        "params": job.params,
+        "result": job.result,
+        "preview_url": url_for(
+            'vqgan.get_job_preview', job_id=job_id, _external=True),
     })
 
 
