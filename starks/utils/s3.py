@@ -15,6 +15,7 @@ def sign_get_url(obj_key, bucket_name, expiration_sec=(60 * 60)):
             },
             ExpiresIn=expiration_sec,
         )
+        return response
     except ClientError as e:
         logging.error(e)
         return None
