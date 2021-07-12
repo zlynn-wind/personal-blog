@@ -39,8 +39,8 @@ def fail_with(err):
 
 
 def external_url_for(*args, **kwargs):
+    base = kwargs.pop("base", config.ROOT_URL)
     path = url_for(*args, **kwargs)
     if not path.startswith('/'):
         path = '/{}'.format(path)
-    base = kwargs.pop("base", config.ROOT_URL)
     return '{base}{path}'.format(base=base, path=path)

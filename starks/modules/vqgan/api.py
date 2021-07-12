@@ -19,7 +19,7 @@ def report_job():
     payload = request.get_json()
     job_id = payload.get("job_id", None)
     job_type = payload.get("task_type", None)
-    status = payload.get("status", None)
+    event = payload.get("event", None)
     timestamp = payload.get("timestamp", None)
     data = payload.get("data", None)
     if job_type.lower() != "vqgan":
@@ -29,22 +29,24 @@ def report_job():
     if job is None:
         return fail(error="Job not found", status=404)
 
-    if status == "started":
+    if event == "started":
         job.status = VQGANJob.STATUS_IN_PROGRESS
         job.params = {
             "started_at": timestamp,
         }
         job.save()
-        return success()
+        return success({"job_id": job_id})
 
-    if status == "stopped":
+    if event == "stopped":
         job.status = VQGANJob.STATUS_ERROR
         job.set_result(False, data.get("message"))
         job.save()
-        return success()
+        return success({"job_id": job_id})
 
-    if status == "success":
+    if event == "success":
         job.status = VQGANJob.STATUS_SUCCESS
         job.result = {"success": True, **data}
         job.save()
-        return success()
+        return success({"job_id": job_id})
+
+    return fail(error='Bad Request')

@@ -158,6 +158,7 @@ def main():
                 print("No jobs found")
                 time.sleep(3)
                 continue
+
             print(f"Found job, id is {job.id}")
             if not validate_job_params(job):
                 print("Invalid job params.")
