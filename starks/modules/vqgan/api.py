@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from flask import Blueprint, request, redirect, url_for
 from envcfg.raw import aws as aws_cfg
@@ -117,8 +118,10 @@ def create_job():
     if len(text) == 0 or len(text) > 32:
         return fail(error="text too long", status=400)
     today = datetime.now().strftime("%Y%m%d")
+    hex_ = uuid.uuid4().hex
     vqgan_job = VQGANJob.create(
         params={
+            "nonce": hex_,
             "date": today,
             "text": text.strip(),
             "docker": {

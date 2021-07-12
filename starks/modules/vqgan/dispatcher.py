@@ -28,8 +28,11 @@ def get_oldest_pending_job():
 
 
 def get_k8s_job_name(job):
-    r = uuid4().hex
-    return f"vqgan-{job.id}-{r}"
+    nonce = job.params.get('nonce')
+    if nonce is not None and len(nonce) > 0:
+        return f"vqgan-{job. is not None:id}-{nonce}"
+    else:
+        return f"vqgan-{job. is not None:id}"
 
 
 def loop_get_job_status(api_instance, job):
@@ -110,7 +113,7 @@ def create_k8s_job(api_instance, job, prehook, posthook):
     k8s_job = make_job_object(api_instance, job, prehook, posthook)
     api_response = api_instance.create_namespaced_job(
         body=k8s_job, namespace=SERVICE_NAMESPACE)
-    print("Kubernetes job created.")
+    print("Kubernetes job {k8s_job.metadata.name} created.")
     return get_job_status(api_instance, job)
 
 
@@ -165,7 +168,6 @@ def main():
             try:
                 job.to_in_progress()
                 resp = create_k8s_job(batch_v1, job, PREHOOK_URL, POSTHOOK_URL)
-                print(resp)
             except Exception as e:
                 job.set_result(False, f"{e}")
                 job.to_error(_commit=False)
