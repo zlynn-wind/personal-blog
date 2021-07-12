@@ -7,7 +7,7 @@ import docker
 import requests
 
 from starks.wsgi import application
-from starks.modules.vqgan.model.vqgan import VQGANJob
+from starks.modules.vqgan.model.vqgan_job import VQGANJob
 
 
 client = docker.from_env()

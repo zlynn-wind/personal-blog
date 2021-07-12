@@ -7,7 +7,7 @@ from kubernetes import client, config
 
 from starks.wsgi import application
 from starks.utils.api import external_url_for
-from starks.modules.vqgan.model.vqgan import VQGANJob
+from starks.modules.vqgan.model.vqgan_job import VQGANJob
 
 
 AWS_ACCESS_KEY = aws_cfg.ACCESS_KEY
@@ -17,6 +17,7 @@ AWS_EKS_CLUSTER_NAME = aws_cfg.EKS_CLUSTER_NAME
 AWS_BUCKET_NAME = aws_cfg.BUCKET_NAME
 SERVICE_ENDPOINT = cfg.VQGAN_K8S_SERVICE_ENDPOINT
 SERVICE_NAMESPACE = cfg.VQGAN_K8S_SERVICE_NAMESPACE
+S3_PREFIX = cfg.VQGAN_S3_PREFIX
 
 
 def get_oldest_pending_job():
@@ -67,7 +68,9 @@ def make_job_object(api_instance, job, prehook, posthook):
         command=["/workspace/entrypoint.sh"],
         args=["--timeout", "120",
               "--text", f"{input_text}",
-              "--job_id", str(job.id)],
+              "--job_id", str(job.id),
+              "--file_key", f"vqgan/{S3_PREFIX}{job.id}.png",
+          ],
         env=[
             client.V1EnvVar(name="AWS_ACCESS_KEY", value=AWS_ACCESS_KEY),
             client.V1EnvVar(name="AWS_SECRET_KEY", value=AWS_SECRET_KEY),

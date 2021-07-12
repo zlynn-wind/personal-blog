@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for
 
-from starks.modules.vqgan.model.vqgan import VQGANJob
+from starks.modules.vqgan.model.vqgan_job import VQGANJob
 
 
 bp = Blueprint("vqgan_view", __name__, url_prefix="/vqgan")
@@ -36,7 +36,7 @@ def create_vqgan():
             "input_text": input_text.strip(),
             "timeout": timeout,
             "docker": {
-                "image": "surreal/vqgan-clip:latest",
+                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest",
                 "command": f"'{input_text}'",
                 "volume": volume,
             },

@@ -1,25 +1,72 @@
-from flask import Blueprint, request
+from datetime import datetime
 
-from starks.modules.vqgan.model.vqgan import VQGANJob
+from flask import Blueprint, request, redirect, url_for
+from envcfg.raw import aws as aws_cfg
+
+from starks.modules.vqgan.model.vqgan import VQGAN
+from starks.modules.vqgan.model.vqgan_job import VQGANJob
 from starks.utils.api import success, fail
+from starks.utils.s3 import sign_get_url
 
 
-bp = Blueprint("vqgan", __name__, url_prefix="/api/v1/vqgan")
+bp = Blueprint("vqgan", __name__, url_prefix="/api/v1")
+AWS_BUCKET_NAME = aws_cfg.BUCKET_NAME
+MAX_PAGE_SIZE = 50
 
 
-@bp.route("/jobs")
-def list_jobs():
-    jobs = VQGANJob.list_latest_jobs()
-    return success([{'id': j.id, 'params': j.params, 'result': j.result}
-                   for j in jobs])
+@bp.route("vqgan.list")
+def list_vqgans():
+    page = request.args.get("page", type=int, default=1)
+    page_size = request.args.get("page_size", type=int, default=10)
+    page = max(1, page)
+    page_size = min(page_size, MAX_PAGE_SIZE)
+    vqgans = VQGAN.paginate(page, page_size)
+    return success([e.marshal() for e in vqgans.items])
 
 
-@bp.route("/jobs/report", methods=["POST"])
+@bp.route("vqgan.get")
+def get_vqgan():
+    id_ = request.args.get("id")
+    if id is None:
+        return fail(error="Job not found", status=404)
+
+    vqgan = VQGAN.get(id_)
+    if vqgan is None:
+        return fail(error="Job not found", status=404)
+    return success(vqgan.marshal())
+
+
+@bp.route("vqgan-job.get")
+def get_job():
+    job_id = request.args.get("id")
+    job = VQGANJob.get_by_id(job_id)
+    if job is None:
+        return fail(error="Job not found", status=404)
+    return success({
+        "status": job.status,
+        "preview_url": url_for('vqgan.get_job_preview', job_id=job_id),
+    })
+
+
+@bp.route("vqgan/<id_>/preview")
+def preview_vqgan(id_):
+    vqgan = VQGAN.get(id_)
+    if vqgan is None:
+        return fail(error="Job not found", status=404)
+    return redirect(
+        sign_get_url(
+            obj_key=vqgan.obj_key,
+            bucket_name=vqgan.bucket_name,
+        )
+    )
+
+
+@bp.route("vqgan/jobs/report", methods=["POST"])
 def report_job():
     payload = request.get_json()
     job_id = payload.get("job_id", None)
     job_type = payload.get("task_type", None)
-    event = payload.get("event", None)
+    status = payload.get("status", None)
     timestamp = payload.get("timestamp", None)
     data = payload.get("data", None)
     if job_type.lower() != "vqgan":
@@ -29,24 +76,68 @@ def report_job():
     if job is None:
         return fail(error="Job not found", status=404)
 
-    if event == "started":
+    if status == "started":
         job.status = VQGANJob.STATUS_IN_PROGRESS
-        job.params = {
-            "started_at": timestamp,
-        }
+        params = job.params
+        params["started_at"] = timestamp
+        job.params = params
         job.save()
         return success({"job_id": job_id})
 
-    if event == "stopped":
+    if status == "stopped":
         job.status = VQGANJob.STATUS_ERROR
-        job.set_result(False, data.get("message"))
+        job.set_result(is_success=False, error_message=data.get("message"))
         job.save()
         return success({"job_id": job_id})
 
-    if event == "success":
+    if status == "success":
         job.status = VQGANJob.STATUS_SUCCESS
-        job.result = {"success": True, **data}
+        job.set_result(is_success=True, data=data)
         job.save()
+
+        vqgan = VQGAN.create(
+            text=job.params["text"],
+            bucket_name=AWS_BUCKET_NAME,
+            obj_key=job.result["obj_key"]
+        )
+
         return success({"job_id": job_id})
 
     return fail(error='Bad Request')
+
+
+@bp.route("vqgan-job.create", methods=["POST"])
+def create_job():
+    payload = request.get_json()
+    text = payload.get("text", None)
+    if text is None:
+        return fail(error="text can not be empty", status=400)
+
+    # TODO: Translate
+    if len(text) == 0 or len(text) > 32:
+        return fail(error="text too long", status=400)
+    today = datetime.now().strftime("%Y%m%d")
+    vqgan_job = VQGANJob.create(
+        params={
+            "date": today,
+            "text": text.strip(),
+            "docker": {
+                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest", # FIXME
+            }
+        }
+    )
+    return success(vqgan_job.marshal())
+
+
+@bp.route("/jobs/<job_id>/preview")
+def get_job_preview(job_id):
+    job = VQGANJob.get_by_id(job_id)
+    if job is None:
+        return fail(error="Job not found", status=404)
+    result = job.result
+    return redirect(
+        sign_get_url(
+            obj_key=result.filekey,
+            bucket_name=AWS_BUCKET_NAME,
+        )
+    )
