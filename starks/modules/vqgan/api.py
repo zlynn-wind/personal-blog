@@ -115,7 +115,7 @@ def create_job():
         return fail(error="text can not be empty", status=400)
 
     # TODO: Translate
-    if len(text) == 0 or len(text) > 32:
+    if len(text) == 0 or len(text) > 90:
         return fail(error="text too long", status=400)
     today = datetime.now().strftime("%Y%m%d")
     hex_ = uuid.uuid4().hex
