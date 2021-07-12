@@ -1,2 +1,6 @@
 class APIError(Exception):
-    pass
+
+    def __init__(self, code, error, status):
+        self.code = code
+        self.error = error
+        self.status = status

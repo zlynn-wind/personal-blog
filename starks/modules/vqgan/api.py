@@ -101,7 +101,7 @@ def report_job():
             obj_key=job.result["obj_key"]
         )
 
-        return success({"job_id": job_id})
+        return success({})
 
     return fail(error='Bad Request')
 
@@ -122,7 +122,7 @@ def create_job():
             "date": today,
             "text": text.strip(),
             "docker": {
-                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest", # FIXME
+                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest",    # noqa: FIXME
             }
         }
     )
