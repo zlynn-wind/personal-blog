@@ -9,4 +9,4 @@ ADD ./deploy/entrypoint.sh /entrypoint.sh
 ADD ./starks /workspace/starks
 EXPOSE 5000
 WORKDIR "/workspace"
-CMD ["/entrypoint.sh"]
+CMD ["gunicorn", "-c", "/workspace/gunicorn.py", "starks.wsgi:application"]
