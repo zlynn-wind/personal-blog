@@ -74,3 +74,17 @@ class VQGANJob(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def set_status(self, status, _commit=True):
+        self.status = status
+        if _commit is True:
+            self.save()
+
+    def to_success(self, _commit=True):
+        self.set_status(VQGANJob.STATUS_SUCCESS, _commit)
+
+    def to_error(self, _commit=True):
+        self.set_status(VQGANJob.STATUS_ERROR, _commit)
+
+    def to_in_progress(self, _commit=True):
+        self.set_status(VQGANJob.STATUS_IN_PROGRESS, _commit)

@@ -50,7 +50,6 @@ def get_job_status(api_instance, job):
     if api_response.status.succeeded is not None or \
             api_response.status.failed is not None:
         job_completed = True
-    sleep(1)
     print("Job status='%s'" % str(api_response.status))
 
 
@@ -68,7 +67,7 @@ def make_job_object(api_instance, job, prehook, posthook):
         command=["/workspace/entrypoint.sh"],
         args=["--timeout", "120",
               "--text", f"{input_text}",
-              "--job_id", job.id],
+              "--job_id", str(job.id)],
         env=[
             client.V1EnvVar(name="AWS_ACCESS_KEY", value=AWS_ACCESS_KEY),
             client.V1EnvVar(name="AWS_SECRET_KEY", value=AWS_SECRET_KEY),
@@ -108,11 +107,12 @@ def make_job_object(api_instance, job, prehook, posthook):
 
 
 def create_k8s_job(api_instance, job, prehook, posthook):
-    k8s_job = make_job_object(job, prehook, posthook)
+    k8s_job = make_job_object(api_instance, job, prehook, posthook)
+    print(k8s_job)
     api_response = api_instance.create_namespaced_job(
-        body=job, namespace=SERVICE_NAMESPACE)
+        body=k8s_job, namespace=SERVICE_NAMESPACE)
     print("Kubernetes job created.")
-    return get_job_status(k8s_job)
+    return get_job_status(api_instance, job)
 
 
 def validate_job_params(job):
@@ -122,6 +122,7 @@ def validate_job_params(job):
     if input_text is None or len(input_text) == 0:
         print("`input_text` is empty")
         job.set_result(False, "`input_text` is empty")
+        job.to_error(_commit=False)
         job.save()
         return False
 
@@ -129,12 +130,14 @@ def validate_job_params(job):
     if docker_args is None:
         print("`docker` is empty")
         job.set_result(False, "`docker` is empty")
+        job.to_error(_commit=False)
         job.save()
         return False
     docker_image = docker_args.get("image")
     if docker_image is None:
         print("`docker.image` is empty")
         job.set_result(False, "`docker.image` is empty")
+        job.to_error(_commit=False)
         job.save()
         return False
     return True
@@ -151,20 +154,25 @@ def main():
             POSTHOOK_URL = external_url_for(
                 "vqgan.report_job", base=SERVICE_ENDPOINT)
             job = get_oldest_pending_job()
-
             if job is None:
                 print("No jobs found")
                 time.sleep(3)
                 continue
+            print(f"Found job, id is {job.id}")
             if not validate_job_params(job):
                 print("Invalid job params.")
                 continue
-            print(f"Found job, id is {job.id}")
             try:
+                job.to_in_progress()
                 resp = create_k8s_job(batch_v1, job, PREHOOK_URL, POSTHOOK_URL)
                 print(resp)
             except Exception as e:
+                job.set_result(False, f"{e}")
+                job.to_error(_commit=False)
+                job.save()
                 print(f"[ERROR] Failed to dispatch job {job.id}: {e}")
+            finally:
+                time.sleep(1)
 
 
 if __name__ == '__main__':
