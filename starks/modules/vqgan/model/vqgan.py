@@ -41,5 +41,5 @@ class VQGAN(db.Model):
             "id": self.id,
             "text": self.text,
             "preview_url": url_for("vqgan.preview_vqgan",
-                                   id_=self.id, _external=True),
+                                   id=self.id, _external=True),
         }
