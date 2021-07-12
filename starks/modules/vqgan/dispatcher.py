@@ -60,6 +60,9 @@ def make_job_object(api_instance, job, prehook, posthook):
     text = params.get("text")
     docker_args = params.get('docker', None)
     docker_image = docker_args.get("image")
+    nonce = job.params.get("nonce")
+    if nonce is None:
+        nonce = uuid4().hex
 
     k8s_job_name = get_k8s_job_name(job)
     container = client.V1Container(
@@ -67,10 +70,12 @@ def make_job_object(api_instance, job, prehook, posthook):
         image=docker_image,
         image_pull_policy="Always",
         command=["/workspace/entrypoint.sh"],
-        args=["--timeout", "120",
-              "--text", f"{text}",
-              "--job_id", str(job.id),
-              "--file_key", f"vqgan/{S3_PREFIX}{job.id}.png"],
+        args=[
+            "--timeout", "120",
+            "--text", f"{text}",
+            "--job_id", str(job.id),
+            "--file_key", f"vqgan/{S3_PREFIX}{nonce}.png",
+        ],
         env=[
             client.V1EnvVar(name="AWS_ACCESS_KEY", value=AWS_ACCESS_KEY),
             client.V1EnvVar(name="AWS_SECRET_KEY", value=AWS_SECRET_KEY),
