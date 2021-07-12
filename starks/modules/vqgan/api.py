@@ -79,21 +79,21 @@ def report_job():
 
     if status == "started":
         job.status = VQGANJob.STATUS_IN_PROGRESS
-        params = job.params
-        params["started_at"] = timestamp
-        job.params = params
+        job.started_at = datetime.fromtimestamp(int(timestamp/1000))
         job.save()
         return success({"job_id": job_id})
 
     if status == "stopped":
         job.status = VQGANJob.STATUS_ERROR
         job.set_result(is_success=False, error_message=data.get("message"))
+        job.ended_at = datetime.utcnow()
         job.save()
         return success({"job_id": job_id})
 
     if status == "success":
         job.status = VQGANJob.STATUS_SUCCESS
         job.set_result(is_success=True, data=data)
+        job.ended_at = datetime.utcnow()
         job.save()
 
         vqgan = VQGAN.create(

@@ -18,6 +18,7 @@ class VQGANJob(db.Model):
     _params = db.Column('params', db.String(4096), default="{}")
     _result = db.Column('result', db.String(4096), default="{}")
     started_at = db.Column(db.DateTime, nullable=True)
+    ended_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     @classmethod

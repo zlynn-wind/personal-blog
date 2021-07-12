@@ -30,9 +30,9 @@ def get_oldest_pending_job():
 def get_k8s_job_name(job):
     nonce = job.params.get('nonce')
     if nonce is not None and len(nonce) > 0:
-        return f"vqgan-{job. is not None:id}-{nonce}"
+        return f"vqgan-{job.id}-{nonce}"
     else:
-        return f"vqgan-{job. is not None:id}"
+        return f"vqgan-{job.id}"
 
 
 def loop_get_job_status(api_instance, job):
@@ -143,6 +143,10 @@ def validate_job_params(job):
         job.save()
         return False
     return True
+
+
+def clean_k8s_jobs(api_instance):
+    pass
 
 
 def main():
