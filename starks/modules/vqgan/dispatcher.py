@@ -1,8 +1,8 @@
 import time
 import os
 
-from envcfg import asw as aws_cfg
-from envcfg import starks as cfg
+from envcfg.raw import aws as aws_cfg
+from envcfg.raw import starks as cfg
 from kubernetes import client, config
 
 from starks.wsgi import application
