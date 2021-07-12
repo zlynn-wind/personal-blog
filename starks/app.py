@@ -2,7 +2,7 @@ from envcfg.raw import starks as config
 from flask import Flask
 from werkzeug.utils import import_string
 
-from starks.extensions import db, cache
+from starks.extensions import db, cache, cors
 from starks.error import APIError
 
 
@@ -23,6 +23,7 @@ def create_app(import_name=None):
     app.debug = bool(int(config.DEBUG))
     app.config['SQLALCHEMY_POOL_RECYCLE'] = int(config.SQLALCHEMY_POOL_RECYCLE)
 
+    cors.init_app(app)
     db.init_app(app)
     cache.init_app(app, config={'CACHE_TYPE': config.CACHE_TYPE})
 
