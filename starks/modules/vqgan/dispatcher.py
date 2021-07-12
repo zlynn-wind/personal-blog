@@ -1,3 +1,4 @@
+from uuid import uuid4
 import time
 
 from envcfg.raw import aws as aws_cfg
@@ -27,7 +28,8 @@ def get_oldest_pending_job():
 
 
 def get_k8s_job_name(job):
-    return f"vqgan-{job.id}"
+    r = uuid4().hex
+    return f"vqgan-{job.id}-{r}"
 
 
 def loop_get_job_status(api_instance, job):
