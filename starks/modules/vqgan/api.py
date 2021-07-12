@@ -15,7 +15,7 @@ AWS_BUCKET_NAME = aws_cfg.BUCKET_NAME
 MAX_PAGE_SIZE = 50
 
 
-@bp.route("vqgan.list")
+@bp.route("/paint.list")
 def list_vqgans():
     page = request.args.get("page", type=int, default=1)
     page_size = request.args.get("page_size", type=int, default=10)
@@ -25,19 +25,19 @@ def list_vqgans():
     return success([e.marshal() for e in vqgans.items])
 
 
-@bp.route("vqgan.get")
+@bp.route("/paint.get")
 def get_vqgan():
     id_ = request.args.get("id")
     if id is None:
-        return fail(error="Job not found", status=404)
+        return fail(error="Paint not found", status=404)
 
-    vqgan = VQGAN.get(id_)
+    vqgan = VQGAN.query.get(id_)
     if vqgan is None:
-        return fail(error="Job not found", status=404)
+        return fail(error="Paint not found", status=404)
     return success(vqgan.marshal())
 
 
-@bp.route("vqgan-job.get")
+@bp.route("/paint-job.get")
 def get_job():
     job_id = request.args.get("id")
     job = VQGANJob.get_by_id(job_id)
@@ -49,8 +49,9 @@ def get_job():
     })
 
 
-@bp.route("vqgan/<id_>/preview")
-def preview_vqgan(id_):
+@bp.route("/paint.preview")
+def preview_vqgan():
+    id_ = request.args.get("id", type=int)
     vqgan = VQGAN.get(id_)
     if vqgan is None:
         return fail(error="Job not found", status=404)
@@ -62,7 +63,7 @@ def preview_vqgan(id_):
     )
 
 
-@bp.route("vqgan/jobs/report", methods=["POST"])
+@bp.route("/paint-job.report", methods=["POST"])
 def report_job():
     payload = request.get_json()
     job_id = payload.get("job_id", None)
@@ -107,7 +108,7 @@ def report_job():
     return fail(error='Bad Request')
 
 
-@bp.route("vqgan-job.create", methods=["POST"])
+@bp.route("/paint-job.create", methods=["POST"])
 def create_job():
     payload = request.get_json()
     text = payload.get("text", None)
@@ -132,8 +133,9 @@ def create_job():
     return success(vqgan_job.marshal())
 
 
-@bp.route("/jobs/<job_id>/preview")
+@bp.route("/paint-jobs.preview")
 def get_job_preview(job_id):
+    job_id = request.args.get("job_id", type=int)
     job = VQGANJob.get_by_id(job_id)
     if job is None:
         return fail(error="Job not found", status=404)
