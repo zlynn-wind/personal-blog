@@ -1,5 +1,4 @@
 import time
-import os
 
 from envcfg.raw import aws as aws_cfg
 from envcfg.raw import starks as cfg
@@ -40,7 +39,7 @@ def loop_get_job_status(api_instance, job):
         if api_response.status.succeeded is not None or \
                 api_response.status.failed is not None:
             job_completed = True
-        sleep(1)
+        time.sleep(1)
         print("Job status='%s'" % str(api_response.status))
 
 
@@ -48,15 +47,12 @@ def get_job_status(api_instance, job):
     api_response = api_instance.read_namespaced_job_status(
         name=get_k8s_job_name(job),
         namespace=SERVICE_NAMESPACE)
-    if api_response.status.succeeded is not None or \
-            api_response.status.failed is not None:
-        job_completed = True
-    print("Job status='%s'" % str(api_response.status))
+    print(str(api_response.status))
 
 
-def make_job_object(api_instance, job, prehook, posthook): 
+def make_job_object(api_instance, job, prehook, posthook):
     params = job.params
-    input_text = params.get("input_text")
+    text = params.get("text")
     docker_args = params.get('docker', None)
     docker_image = docker_args.get("image")
 
@@ -67,10 +63,9 @@ def make_job_object(api_instance, job, prehook, posthook):
         image_pull_policy="Always",
         command=["/workspace/entrypoint.sh"],
         args=["--timeout", "120",
-              "--text", f"{input_text}",
+              "--text", f"{text}",
               "--job_id", str(job.id),
-              "--file_key", f"vqgan/{S3_PREFIX}{job.id}.png",
-          ],
+              "--file_key", f"vqgan/{S3_PREFIX}{job.id}.png"],
         env=[
             client.V1EnvVar(name="AWS_ACCESS_KEY", value=AWS_ACCESS_KEY),
             client.V1EnvVar(name="AWS_SECRET_KEY", value=AWS_SECRET_KEY),
@@ -111,7 +106,6 @@ def make_job_object(api_instance, job, prehook, posthook):
 
 def create_k8s_job(api_instance, job, prehook, posthook):
     k8s_job = make_job_object(api_instance, job, prehook, posthook)
-    print(k8s_job)
     api_response = api_instance.create_namespaced_job(
         body=k8s_job, namespace=SERVICE_NAMESPACE)
     print("Kubernetes job created.")
@@ -120,11 +114,11 @@ def create_k8s_job(api_instance, job, prehook, posthook):
 
 def validate_job_params(job):
     params = job.params
-    input_text = params.get("input_text")
+    text = params.get("text")
     docker_args = params.get("docker", {})
-    if input_text is None or len(input_text) == 0:
-        print("`input_text` is empty")
-        job.set_result(False, "`input_text` is empty")
+    if text is None or len(text) == 0:
+        print("`text` is empty")
+        job.set_result(False, "`text` is empty")
         job.to_error(_commit=False)
         job.save()
         return False
