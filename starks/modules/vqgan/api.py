@@ -37,21 +37,6 @@ def get_vqgan():
     return success(vqgan.marshal())
 
 
-@bp.route("/paint-job.get")
-def get_job():
-    job_id = request.args.get("id")
-    job = VQGANJob.get_by_id(job_id)
-    if job is None:
-        return fail(error="Job not found", status=404)
-    return success({
-        "status": job.status,
-        "params": job.params,
-        "result": job.result,
-        "preview_url": url_for(
-            'vqgan.get_job_preview', job_id=job_id, _external=True),
-    })
-
-
 @bp.route("/paint.preview")
 def preview_vqgan():
     id_ = request.args.get("id", type=int)
@@ -64,6 +49,31 @@ def preview_vqgan():
             bucket_name=vqgan.bucket_name,
         )
     )
+
+
+@bp.route("/paint.create", methods=["POST"])
+def create_paint():
+    payload = request.get_json()
+    text = payload.get("text", None)
+    if text is None:
+        return fail(error="text can not be empty", status=400)
+
+    # TODO: Translate
+    if len(text) == 0 or len(text) > 90:
+        return fail(error="text too long", status=400)
+    today = datetime.now().strftime("%Y%m%d")
+    hex_ = uuid.uuid4().hex
+    vqgan_job = VQGANJob.create(
+        params={
+            "nonce": hex_,
+            "date": today,
+            "text": text.strip(),
+            "docker": {
+                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest",    # noqa: FIXME
+            }
+        }
+    )
+    return success(vqgan_job.marshal())
 
 
 @bp.route("/paint-job.report", methods=["POST"])
@@ -109,6 +119,20 @@ def report_job():
         return success({})
 
     return fail(error='Bad Request')
+
+
+@bp.route("/paint-job.get")
+def get_job():
+    job_id = request.args.get("id")
+    job = VQGANJob.get_by_id(job_id)
+    if job is None:
+        return fail(error="Job not found", status=404)
+    return success({
+        "status": job.status,
+        "result": job.result,
+        "preview_url": url_for(
+            'vqgan.get_job_preview', job_id=job_id, _external=True),
+    })
 
 
 @bp.route("/paint-job.create", methods=["POST"])
