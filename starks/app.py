@@ -1,5 +1,5 @@
 from envcfg.raw import starks as config
-from flask import Flask
+from flask import Flask, jsonify
 from werkzeug.utils import import_string
 
 from starks.extensions import db, cache, cors
@@ -12,7 +12,6 @@ blueprints = [
     'starks.modules.video_eval.api:bp',
 
     'starks.modules.vqgan.api:bp',
-    'starks.modules.vqgan.view:bp',
 ]
 
 
