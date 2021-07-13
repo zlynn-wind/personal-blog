@@ -1,14 +1,6 @@
 starks
 ============
 
-## Quick Start
-
-```
-$ grep -rl 'starks' ./ |  xargs  sed -i "" -e "s/starks/foobar_robot/g"
-$ grep -rl 'STARKS' ./ |  xargs  sed -i "" -e "s/STARKS/FOOBAR_ROBOT/g"
-$ mv PROJECT foobar_robot
-```
-
 ## Development
 
 #### 1. Install pip
@@ -45,4 +37,4 @@ Edit `.env` according to your envrionments.
 
 #### 8. Start server
 
-`$ honcho start`
+`$ flask run`
