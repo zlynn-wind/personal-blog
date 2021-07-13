@@ -4,7 +4,7 @@ ADD ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt -i https://pypi.douban.com/simple \
     && pip install gunicorn awscli
 
-ADD ./deploy/gunicorn.conf /workspace/gunicorn.conf
+ADD ./deploy/gunicorn.py /workspace/gunicorn.py
 ADD ./deploy/entrypoint.sh /entrypoint.sh
 ADD ./starks /workspace/starks
 EXPOSE 5000
