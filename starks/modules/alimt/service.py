@@ -4,7 +4,7 @@ import json
 from envcfg.raw import starks as config
 
 from aliyunsdkcore.client import AcsClient
-from aliyunsdkalimt.request.v20181012 import TranslateRequest
+from aliyunsdkalimt.request.v20181012 import TranslateGeneralRequest
 
 
 client = AcsClient(
@@ -15,7 +15,7 @@ client = AcsClient(
 
 
 def zh2en(text):
-    request = TranslateRequest.TranslateRequest()
+    request = TranslateGeneralRequest.TranslateGeneralRequest()
     request.set_SourceLanguage("zh")
     request.set_SourceText(text)
     request.set_FormatType("text")
