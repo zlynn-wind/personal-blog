@@ -4,6 +4,8 @@ import uuid
 from flask import Blueprint, request, redirect, url_for
 from envcfg.raw import aws as aws_cfg
 
+from starks.modules.alimt.service import zh2en
+from starks.modules.vqgan.helper import get_random_style
 from starks.modules.vqgan.model.vqgan import VQGAN
 from starks.modules.vqgan.model.vqgan_job import VQGANJob
 from starks.utils.api import success, fail
@@ -13,6 +15,8 @@ from starks.utils.s3 import sign_get_url
 bp = Blueprint("vqgan", __name__, url_prefix="/api/v1")
 AWS_BUCKET_NAME = aws_cfg.BUCKET_NAME
 MAX_PAGE_SIZE = 50
+
+VQGAN_IMAGE = "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest",    # noqa: FIXME
 
 
 @bp.route("/paint.list")
@@ -54,22 +58,28 @@ def preview_vqgan():
 @bp.route("/paint.create", methods=["POST"])
 def create_paint():
     payload = request.get_json()
-    text = payload.get("text", None)
-    if text is None:
+    raw_text = payload.get("text", None)
+    if raw_text is None:
         return fail(error="text can not be empty", status=400)
 
-    # TODO: Translate
-    if len(text) == 0 or len(text) > 90:
+    raw_text = raw_text.strip()
+
+    if len(raw_text) == 0 or len(raw_text) > 90:
         return fail(error="text too long", status=400)
+
+    text = zh2en(raw_text)
     today = datetime.now().strftime("%Y%m%d")
     hex_ = uuid.uuid4().hex
+
     vqgan_job = VQGANJob.create(
         params={
             "nonce": hex_,
             "date": today,
-            "text": text.strip(),
+            "raw_text": raw_text,
+            "text": text,
+            "style": get_random_style(),
             "docker": {
-                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest",    # noqa: FIXME
+                "image": VQGAN_IMAGE,
             }
         }
     )
@@ -111,7 +121,7 @@ def report_job():
         job.save()
 
         vqgan = VQGAN.create(
-            text=job.params["text"],
+            text=job.params["raw_text"],
             bucket_name=AWS_BUCKET_NAME,
             obj_key=job.result.get("data", {}).get("obj_key")
         )
@@ -138,22 +148,28 @@ def get_job():
 @bp.route("/paint-job.create", methods=["POST"])
 def create_job():
     payload = request.get_json()
-    text = payload.get("text", None)
-    if text is None:
+    raw_text = payload.get("text", None)
+    if raw_text is None:
         return fail(error="text can not be empty", status=400)
 
-    # TODO: Translate
-    if len(text) == 0 or len(text) > 90:
+    raw_text = raw_text.strip()
+
+    if len(raw_text) == 0 or len(raw_text) > 90:
         return fail(error="text too long", status=400)
+
+    text = zh2en(raw_text)
     today = datetime.now().strftime("%Y%m%d")
     hex_ = uuid.uuid4().hex
+
     vqgan_job = VQGANJob.create(
         params={
             "nonce": hex_,
             "date": today,
-            "text": text.strip(),
+            "raw_text": raw_text,
+            "text": text,
+            "style": get_random_style(),
             "docker": {
-                "image": "413195515848.dkr.ecr.cn-northwest-1.amazonaws.com.cn/surreal-vqgan-clip:latest",    # noqa: FIXME
+                "image": VQGAN_IMAGE,
             }
         }
     )

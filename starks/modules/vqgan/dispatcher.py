@@ -58,6 +58,7 @@ def get_job_status(api_instance, job):
 def make_job_object(api_instance, job, prehook, posthook):
     params = job.params
     text = params.get("text")
+    style = params.get("style", "")
     docker_args = params.get('docker', None)
     docker_image = docker_args.get("image")
     nonce = job.params.get("nonce")
@@ -72,7 +73,7 @@ def make_job_object(api_instance, job, prehook, posthook):
         command=["/workspace/entrypoint.sh"],
         args=[
             "--timeout", "120",
-            "--text", f"{text}",
+            "--text", f"{text} {style}",
             "--job_id", str(job.id),
             "--file_key", f"vqgan/{S3_PREFIX}{nonce}.png",
         ],

@@ -10,15 +10,17 @@ class VQGAN(db.Model):
     __tablename__ = "vqgans"
 
     id = db.Column(db.Integer, primary_key=True, nullable=False)
-    text = db.Column(db.String(64), nullable=False)
+    text = db.Column(db.String(128), nullable=False)
+    style_text = db.Column(db.String(64), nullable=False)
     bucket_name = db.Column(db.String(128), nullable=False)
     obj_key = db.Column(db.String(256), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     @classmethod
-    def create(cls, text, bucket_name, obj_key, _commit=True):
+    def create(cls, text, style_text, bucket_name, obj_key, _commit=True):
         obj = cls(
             text=text,
+            style_text=style_text,
             bucket_name=bucket_name,
             obj_key=obj_key,
         )
